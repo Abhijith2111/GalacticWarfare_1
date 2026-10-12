@@ -83,9 +83,32 @@ public sealed class GridBoard
 
 public static class CombatRules
 {
+    public static void PerformAttack(ShipUnit attacker, ShipUnit target)
+    {
+        target.Hp -= attacker.Damage;
+    }
 
+    public static bool PerformHeal(ShipUnit healer, ShipUnit target)
+    {
+        if (healer.ShipType != GameConfig.Healer)
+            return false;
+        if (healer.HealCooldownRemaining > 0)
+            return false;
+        if (healer.OwnerId != target.OwnerId)
+            return false;
+        if(GameConfig.Chebyshev(healer.X, healer.Y, target.X, target.Y) > GameConfig.HealRange)
+            return false;
+
+        target.Hp = GameConfig.Clamp(target.Hp + GameConfig.HealAmount, 0, target.MaxHp);
+        healer.HealCooldownRemaining = GameConfig.HealCooldownTurns;
+        return true;
+    }
 }
 
+public sealed class PickupBoard
+{
+
+}
 public class BoardSystems : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
